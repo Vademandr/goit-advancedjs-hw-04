@@ -1,4 +1,3 @@
-
 import { apiService } from './api-service';
 import { onRenderGallery } from './gallery';
 import iziToast from 'izitoast';
@@ -21,6 +20,7 @@ window.addEventListener('scroll', handleScroll);
 async function onSearch(event) {
   event.preventDefault();
   const newQuery = event.currentTarget.searchQuery.value.trim();
+
   if (newQuery === query) {
     iziToast.info({
       title: 'Info',
@@ -31,6 +31,7 @@ async function onSearch(event) {
 
     return;
   }
+
   gallery.innerHTML = '';
 
   if (!newQuery) {
@@ -64,6 +65,22 @@ async function onSearch(event) {
 
     onRenderGallery(hits);
     simpleLightBox = new SimpleLightbox('.gallery a').refresh();
+
+    // Added code to check for end of results when submitting
+    const totalPages = Math.ceil(totalHits / perPage);
+
+    if (page >= totalPages) {
+      iziToast.info({
+        title: 'Info',
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+        color: 'blue',
+      });
+      window.removeEventListener('scroll', handleScroll);
+    } else {
+      window.addEventListener('scroll', handleScroll);
+    }
+
     iziToast.success({
       title: 'Success',
       message: `Hooray! We found ${totalHits} images !!!`,
@@ -72,8 +89,6 @@ async function onSearch(event) {
     });
   } catch (error) {
     console.log(error);
-  } finally {
-    window.addEventListener('scroll', handleScroll);
   }
 }
 
